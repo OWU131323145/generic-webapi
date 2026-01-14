@@ -1,0 +1,53 @@
+{
+  "savedAt": 1768411033636,
+  "code": "3NDYCB",
+  "data": {
+    "version": "v5",
+    "items": [
+      {
+        "id": "3e3ad152-0736-4357-bb77-a0a8c8b9a6d7",
+        "type": "diary",
+        "savedAt": 1768399462527,
+        "date": "2026-01-14",
+        "rawTranscript": "今日は頭が痛かった。学食でひれかつを660円で食べた。",
+        "cleanTranscript": "今日は頭が痛かった。学食でひれかつを660円で食べた。",
+        "finance": {
+          "currency": "JPY",
+          "expenses": [
+            {
+              "amount": 660,
+              "category": "食費",
+              "memo": "ひれかつ"
+            }
+          ]
+        },
+        "health": {
+          "sleepHours": 6,
+          "symptoms": [
+            "頭痛"
+          ]
+        },
+        "ai": {
+          "date": "2026-01-14",
+          "clean_transcript": "今日は頭が痛かった。学食でひれかつを660円で食べた。",
+          "finance": {
+            "currency": "JPY",
+            "expenses": [
+              {
+                "amount": 660,
+                "category": "食費",
+                "memo": "ひれかつ"
+              }
+            ]
+          },
+          "health": {
+            "sleepHours": null,
+            "symptoms": [
+              "頭痛"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

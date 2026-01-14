@@ -108,6 +108,14 @@
     font-size: 24px;
 }
 
+.result {
+  background: #f1f5f9;
+  padding: 16px;
+  margin-top: 10px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+}
+
 @media (max-width: 768px) {
     .question {
         font-size: 18px;

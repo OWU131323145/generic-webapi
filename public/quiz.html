@@ -1,242 +1,152 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Quiz Generator</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="quiz.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VLT | 記録</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
+
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>ITパスポート対策クイズ</h1>
-        </div>
-
-        <div class="quiz-container">
-            <!-- クイズ設定画面 -->
-            <div class="quiz-setup" id="quizSetup">
-                <div class="form-group">
-                    <label for="quizTitle">クイズのタイトル:</label>
-                    <input type="text" id="quizTitle" placeholder="例: ITパスポート対策クイズ" value="ITパスポート対策クイズ">
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="questionCount">問題数:</label>
-                        <input type="number" id="questionCount" min="1" max="20" value="5">
-                    </div>
-                    
-                    <div class="form-group">
-                        <button class="btn" onclick="generateQuiz()">クイズを生成</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- クイズ実行画面 -->
-            <div class="quiz-playing" id="quizPlaying">
-                <div class="quiz-progress" id="quizProgress"></div>
-                <h2 id="quizTitleDisplay"></h2>
-                
-                <div class="question" id="currentQuestion"></div>
-                
-                <ul class="selections" id="selections"></ul>
-                
-                <div class="answer-feedback" id="answerFeedback"></div>
-                
-                <button class="btn" id="nextBtn" onclick="nextQuestion()" style="display: none;">次の問題</button>
-                <button class="btn" id="finishBtn" onclick="showResults()" style="display: none;">結果を見る</button>
-            </div>
-
-            <!-- 結果画面 -->
-            <div class="quiz-results" id="quizResults">
-                <h2>クイズ結果</h2>
-                <div class="score" id="finalScore"></div>
-                <button class="btn" onclick="restartQuiz()">新しいクイズを作成</button>
-            </div>
-        </div>
-
-        <div class="status" id="status">Ready</div>
-        <div class="loading" id="loading">クイズを生成中...</div>
+  <div class="container">
+    <div class="header">
+      <div class="brand">
+        <h1>Voice Life Translator</h1>
+        <div class="hint">話す → 整える → 保存。あとで見返せます。</div>
+      </div>
+      <div class="nav">
+        <a class="nav-link active" href="quiz.html">記録</a>
+        <a class="nav-link" href="calendar.html">カレンダー</a>
+        <a class="nav-link" href="chat.html">対話</a>
+        <a class="nav-link" href="sleep.html">睡眠</a>
+        <a class="nav-link" href="data.html">データ</a>
+      </div>
     </div>
 
-    <script>
-        let quizData = [];
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let selectedAnswer = null;
-        let hasAnswered = false;
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">更新（同期）</div>
+          <div id="syncTinyStatus" class="hint"></div>
+        </div>
+        <button id="btnSync" class="btn-ghost" type="button">更新</button>
+      </div>
 
-        // 初期化
-        document.addEventListener('DOMContentLoaded', function() {
-            updateStatus();
-        });
+      <div class="row" style="align-items:flex-start;">
+        <div class="control" style="flex:1; min-width:260px;">
+          <label>記録する日</label>
+          <input id="entryDate" class="input" type="date">
+          <div class="hint" style="margin-top:6px;">過去の日付も選べます。</div>
+        </div>
 
-        // ステータス更新
-        function updateStatus() {
-            const statusEl = document.getElementById('status');
-            statusEl.textContent = 'Ready to generate ITパスポート quiz';
-            statusEl.style.color = '#28a745';
-        }
+        <!-- QR：PCのみ -->
+        <div class="only-desktop" style="min-width:260px;">
+          <div class="hint">スマホで開く（QR）</div>
+          <div id="qr" class="card" style="display:inline-block; padding:10px; margin-top:6px;"></div>
+          <div class="hint" id="qrText" style="margin-top:6px;"></div>
+        </div>
+      </div>
+    </div>
 
-        // クイズ生成
-        async function generateQuiz() {
-            const title = document.getElementById('quizTitle').value.trim();
-            const count = parseInt(document.getElementById('questionCount').value);
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">本文</div>
+          <div class="hint">短くでOK。AIが読みやすく整えて、体調・支出も拾います。</div>
+        </div>
+        <div class="row">
+          <button id="btnVoice" class="btn-ghost" type="button">音声入力</button>
+          <button id="btnClean" class="btn" type="button">整えて自動入力</button>
+        </div>
+      </div>
 
-            if (!title || count < 1) {
-                alert('すべての項目を正しく入力してください');
-                return;
-            }
+      <textarea id="rawText" class="input" rows="5" placeholder="例：頭が痛い。コンビニで薬980円買った。早めに寝たい。"></textarea>
+      <div id="cleanLoading" class="loading">処理中…</div>
 
-            document.getElementById('loading').classList.add('show');
+      <div style="margin-top:10px;">
+        <div class="hint">整えた文章（編集OK）</div>
+        <textarea id="cleanText" class="input" rows="5" placeholder="（整えた文章がここに表示されます）"></textarea>
+      </div>
+    </div>
 
-            try {
-                const response = await fetch('/api/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        title: title,
-                        count: count
-                    })
-                });
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">写真から入力（任意）</div>
+          <div class="hint">レシート/体温計/薬/メモなどを撮って読み取れます。</div>
+        </div>
+        <button id="btnVision" class="btn-ghost" type="button">写真を読み取る</button>
+      </div>
 
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'API error');
-                }
+      <input id="photoInput" class="input" type="file" accept="image/*" multiple>
+      <div id="visionLoading" class="loading">画像を解析中…</div>
+      <div class="hint" style="margin-top:8px;">※最大3枚まで。内容は“推測”なので、必要なら直してください。</div>
+    </div>
 
-                const data = await response.json();
-                quizData = data.data;
-                console.log(data);
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">体調と睡眠（自動でも手でもOK）</div>
+          <div class="hint">忘れがちな項目は、本文/写真から自動入力します。</div>
+        </div>
+      </div>
 
+      <div class="row">
+        <div class="control" style="flex:1;">
+          <label>睡眠時間（任意）</label>
+          <input id="sleepHours" class="input" type="number" min="0" max="24" step="0.5" placeholder="例：6.5">
+        </div>
 
-                if (!Array.isArray(quizData) || quizData.length === 0) {
-                    console.log(quizData);
-                    throw new Error('Invalid quiz data format');
-                }
+        <div class="control" style="flex:2;">
+          <label>体調（タップで追加）</label>
+          <div class="chips" id="symptomChips"></div>
+          <div id="symptomSelected" class="badges"></div>
+        </div>
+      </div>
+    </div>
 
-                currentQuestionIndex = 0;
-                score = 0;
-                document.getElementById('quizTitleDisplay').textContent = data.title;
-                startQuiz();
-                
-            } catch (error) {
-                console.error('Error:', error);
-                alert('クイズの生成に失敗しました: ' + error.message);
-            } finally {
-                document.getElementById('loading').classList.remove('show');
-            }
-        }
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">支出（自動でも手でもOK）</div>
+          <div class="hint">本文から自動で追加できます。</div>
+        </div>
+      </div>
 
-        // クイズ開始
-        function startQuiz() {
-            document.getElementById('quizSetup').style.display = 'none';
-            document.getElementById('quizPlaying').style.display = 'block';
-            document.getElementById('quizResults').style.display = 'none';
-            showQuestion();
-        }
+      <div class="row">
+        <div class="control" style="flex:1;">
+          <label>内容</label>
+          <input id="expenseLabel" class="input" placeholder="例：薬 / コンビニ / 交通費">
+        </div>
+        <div class="control" style="flex:1;">
+          <label>金額（円）</label>
+          <input id="expenseAmount" class="input" type="number" min="0" step="1" placeholder="例：980">
+        </div>
+        <button id="btnAddExpense" class="btn-ghost" type="button">追加</button>
+      </div>
 
-        // 問題表示
-        function showQuestion() {
-            if (currentQuestionIndex >= quizData.length) {
-                showResults();
-                return;
-            }
+      <div id="expenseList" class="badges" style="margin-top:8px;"></div>
+      <div class="hint" id="expenseSum" style="margin-top:6px;"></div>
+    </div>
 
-            const question = quizData[currentQuestionIndex];
-            hasAnswered = false;
-            selectedAnswer = null;
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">保存</div>
+          <div class="hint">保存するとカレンダー／対話／データに反映されます。</div>
+        </div>
+        <div class="row">
+          <button id="btnSave" class="btn" type="button">保存</button>
+          <button id="btnReset" class="btn-ghost" type="button">入力をクリア</button>
+        </div>
+      </div>
+      <div id="saveStatus" class="hint"></div>
+    </div>
 
-            document.getElementById('quizProgress').textContent = 
-                `問題 ${currentQuestionIndex + 1} / ${quizData.length}`;
-            
-            document.getElementById('currentQuestion').textContent = question.question;
-            
-            const selectionsEl = document.getElementById('selections');
-            selectionsEl.innerHTML = '';
-            
-            question.selections.forEach((selection, index) => {
-                const li = document.createElement('li');
-                li.className = 'selection-item';
-                li.textContent = selection;
-                li.onclick = () => selectAnswer(index);
-                selectionsEl.appendChild(li);
-            });
+  </div>
 
-            document.getElementById('answerFeedback').style.display = 'none';
-            document.getElementById('nextBtn').style.display = 'none';
-            document.getElementById('finishBtn').style.display = 'none';
-        }
-
-        // 答え選択
-        function selectAnswer(index) {
-            if (hasAnswered) return;
-
-            selectedAnswer = index;
-            hasAnswered = true;
-
-            const question = quizData[currentQuestionIndex];
-            const correctAnswer = question.answer;
-            const isCorrect = selectedAnswer === correctAnswer;
-
-            if (isCorrect) {
-                score++;
-            }
-
-            const selectionItems = document.querySelectorAll('.selection-item');
-            selectionItems.forEach((item, i) => {
-                item.onclick = null;
-                if (i === correctAnswer) {
-                    item.classList.add('correct');
-                } else if (i === selectedAnswer && !isCorrect) {
-                    item.classList.add('incorrect');
-                }
-            });
-
-            const feedback = document.getElementById('answerFeedback');
-            feedback.style.display = 'block';
-            if (isCorrect) {
-                feedback.className = 'answer-feedback correct';
-                feedback.textContent = '正解！';
-            } else {
-                feedback.className = 'answer-feedback incorrect';
-                feedback.textContent = `不正解。正解は「${question.selections[correctAnswer]}」です。`;
-            }
-
-            if (currentQuestionIndex < quizData.length - 1) {
-                document.getElementById('nextBtn').style.display = 'inline-block';
-            } else {
-                document.getElementById('finishBtn').style.display = 'inline-block';
-            }
-        }
-
-        // 次の問題
-        function nextQuestion() {
-            currentQuestionIndex++;
-            showQuestion();
-        }
-
-        // 結果表示
-        function showResults() {
-            document.getElementById('quizPlaying').style.display = 'none';
-            document.getElementById('quizResults').style.display = 'block';
-            
-            const percentage = Math.round((score / quizData.length) * 100);
-            document.getElementById('finalScore').textContent = 
-                `${score} / ${quizData.length} 問正解 (${percentage}%)`;
-        }
-
-        // クイズリスタート
-        function restartQuiz() {
-            document.getElementById('quizResults').style.display = 'none';
-            document.getElementById('quizSetup').style.display = 'block';
-            quizData = [];
-            currentQuestionIndex = 0;
-            score = 0;
-        }
-    </script>
+  <script src="sync.js"></script>
+  <script src="quiz.js"></script>
 </body>
 </html>

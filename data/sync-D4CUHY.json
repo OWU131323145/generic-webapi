@@ -1,0 +1,143 @@
+{
+  "savedAt": 1768409637717,
+  "code": "D4CUHY",
+  "data": {
+    "version": "v5",
+    "items": [
+      {
+        "id": "70b386bd-7e7d-450f-b8ab-f4356f9478a5",
+        "type": "sleep",
+        "savedAt": 1768212537327,
+        "date": "2026-01-12",
+        "cleanTranscript": "睡眠モード：0時間（動き平均スコア 0）",
+        "finance": {
+          "currency": "JPY",
+          "expenses": []
+        },
+        "health": {
+          "sleepHours": 0,
+          "symptoms": []
+        },
+        "sleepSession": {
+          "start": 1768212530780,
+          "end": 1768212537326,
+          "durationMin": 1,
+          "durationHours": 0,
+          "motionAvg": 0,
+          "motionSeries": [
+            {
+              "t": 1768212530801,
+              "score": 0
+            }
+          ]
+        }
+      },
+      {
+        "id": "94de9a38-9d02-45dc-8127-2ce342628366",
+        "type": "diary",
+        "savedAt": 1768219206402,
+        "date": "2026-01-12",
+        "rawTranscript": "でもなんでなんで昨日朝まで起きていたので今日も昼まで寝ました大変疲れました",
+        "cleanTranscript": "でもなんで、昨日の朝まで起きていたので、今日も昼まで寝ました。大変疲れました。",
+        "finance": {
+          "currency": "JPY",
+          "expenses": []
+        },
+        "health": {
+          "sleepHours": 6,
+          "symptoms": [
+            "疲れ"
+          ]
+        },
+        "ai": {
+          "date": "2026-01-12",
+          "clean_transcript": "でもなんで、昨日の朝まで起きていたので、今日も昼まで寝ました。大変疲れました。",
+          "finance": {
+            "currency": "JPY",
+            "expenses": []
+          },
+          "health": {
+            "sleepHours": 6,
+            "symptoms": [
+              "疲れ"
+            ]
+          }
+        }
+      },
+      {
+        "id": "7b34f389-69d9-406d-9c44-145a94139b48",
+        "type": "diary",
+        "savedAt": 1768220329584,
+        "date": "2026-01-12",
+        "rawTranscript": "楽しかったな",
+        "cleanTranscript": "楽しかったな",
+        "finance": {
+          "currency": "JPY",
+          "expenses": []
+        },
+        "health": {
+          "sleepHours": null,
+          "symptoms": []
+        },
+        "ai": {
+          "date": "2026-01-12",
+          "clean_transcript": "楽しかったな",
+          "finance": {
+            "currency": "JPY",
+            "expenses": []
+          },
+          "health": {
+            "sleepHours": null,
+            "symptoms": []
+          }
+        }
+      },
+      {
+        "id": "1f879db6-7287-45c1-bbbd-275ca03fef8a",
+        "type": "diary",
+        "savedAt": 1768220875128,
+        "date": "2026-01-12",
+        "rawTranscript": "おとといの話。整理が始まっておなかが痛かった。おかゆ食べた。6時間ネタ。スタバに行ってフラペチーノ飲んだ500円。",
+        "cleanTranscript": "おとといの話です。整理が始まってお腹が痛かったので、おかゆを食べました。6時間寝ました。その後、スタバに行ってフラペチーノを飲みました。500円でした。",
+        "finance": {
+          "currency": "JPY",
+          "expenses": [
+            {
+              "amount": 500,
+              "category": "娯楽",
+              "memo": "スタバ フラペチーノ"
+            }
+          ]
+        },
+        "health": {
+          "sleepHours": 6,
+          "symptoms": [
+            "お腹の痛み",
+            "腹痛"
+          ]
+        },
+        "ai": {
+          "date": "2026-01-12",
+          "clean_transcript": "おとといの話です。整理が始まってお腹が痛かったので、おかゆを食べました。6時間寝ました。その後、スタバに行ってフラペチーノを飲みました。500円でした。",
+          "finance": {
+            "currency": "JPY",
+            "expenses": [
+              {
+                "amount": 500,
+                "category": "娯楽",
+                "memo": "スタバ フラペチーノ"
+              }
+            ]
+          },
+          "health": {
+            "sleepHours": 6,
+            "symptoms": [
+              "お腹の痛み",
+              "腹痛"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
