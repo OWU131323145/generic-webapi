@@ -194,13 +194,17 @@ voice-life-translator/
 ├── server.js
 ├── package.json
 ├── public/
-│   ├── quiz.html
+│   ├── record.html
 │   ├── calendar.html
 │   ├── chat.html
 │   ├── sleep.html
 │   ├── data.html
 │   ├── style.css
-│   ├── quiz.js
+│   ├── voice.css
+│   ├── record.css
+│   ├── calendar.js
+│   ├── record.js
+│   ├── sleep.js
 │   ├── chat.js
 │   ├── data.js
 │   └── sync.js
