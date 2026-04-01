@@ -1,256 +1,199 @@
-# Generic Web API for LLM Integration
+# 3D Gyro Maze Game
 
-A flexible Node.js web API that allows you to create LLM-powered applications by simply editing a Markdown prompt file. No code changes required for different use cases.
+スマートフォンをコントローラーとして使用する、ブラウザベースの3D迷路アクションゲームです。
+p5.js（WEBGL）による3D描画と、Socket.ioによるリアルタイム通信を組み合わせ、直感的かつ没入感のある操作体験を実現しています。
+
+---
+
+## Overview
+
+本プロジェクトは「デバイス間連携」と「リアルタイム物理シミュレーション」をテーマに開発しました。
+
+PCで表示される3D迷路を、スマートフォンのジャイロセンサーで操作します。
+プレイヤーは迷路全体を傾けることでボールを転がし、ゴールを目指します。
+
+---
 
 ## Features
 
-- 🎯 **Generic Design**: One API endpoint for any LLM application
-- 📝 **Markdown Prompts**: Define your application logic in `prompt.md`
-- 🔄 **Variable Substitution**: Automatic replacement of `${variable}` placeholders
-- 🤖 **Multi-Provider**: Supports OpenAI and Google Gemini
-- ⚡ **No Code Changes**: Switch between applications by editing `prompt.md`
+### ジャイロ操作
+
+* スマートフォンの `deviceorientation` を利用
+* 傾き（Beta / Gamma）を取得し、リアルタイムでゲームに反映
+* コントローラー不要の直感的操作
+
+### 3Dレンダリング
+
+* p5.js（WEBGL）による3D描画
+* ライティング（環境光・指向性光・点光源）を実装
+* 奥行きと質感を持つ迷路表現
+
+### リアルタイム通信
+
+* Socket.io による双方向通信
+* センサーデータを低遅延でPCに送信
+* マルチデバイス連携を実現
+
+### 物理挙動シミュレーション
+
+* 傾きに応じた加速度計算
+* 摩擦・慣性を考慮した移動
+* 壁との衝突判定（配列ベース）
+
+### ゲーム演出
+
+* 「Ready... → Go!」の開始演出
+* ゴール時のアニメーション表示
+* プレイ体験を意識したUI設計
+
+---
 
 ## Quick Start
 
-### 1. Installation
+### 1. Install
 
 ```bash
 npm install
 ```
 
-### 2. Environment Setup
-
-Copy `.env.example` to `.env` and set your API key:
+### 2. Run Server
 
 ```bash
-cp .env.example .env
+node server.js
 ```
 
-Edit `.env`:
-```env
-# For Gemini (default)
-GEMINI_API_KEY=your_gemini_api_key_here
+### 3. Access
 
-# For OpenAI (if switching)
-OPENAI_API_KEY=your_openai_api_key_here
+* PC: http://localhost:3000
+* スマートフォン: 同一ネットワーク内で同URLにアクセス
 
-PORT=8080
-```
+※ スマホ側ではセンサーの使用許可が必要です
 
-### 3. Configure LLM Provider
+---
 
-Edit `server.js` lines 13-14:
+## Architecture
 
-```javascript
-// For Gemini (default)
-const PROVIDER = 'gemini';
-const MODEL = 'gemini-2.5-flash';
-
-// For OpenAI
-// const PROVIDER = 'openai';
-// const MODEL = 'gpt-4o-mini';
-```
-
-### 4. Start Server
-
-```bash
-npm start
-```
-
-Visit `http://localhost:8080`
-
-## How It Works
-
-### Architecture
+### データフロー
 
 ```
-Client (quiz.html) → POST /api/ → server.js → LLM → Response
-                                     ↓
-                              prompt.md (template)
+[ Smartphone ]
+  ↓ deviceorientation
+[ Socket.io (emit) ]
+  ↓
+[ Node.js Server ]
+  ↓ broadcast
+[ PC Browser (p5.js) ]
 ```
 
-### Variable Substitution
+### 各役割
 
-The API automatically replaces variables in `prompt.md` with request data:
+| コンポーネント | 役割        |
+| ------- | --------- |
+| スマートフォン | 傾きセンサーの取得 |
+| Node.js | データの中継    |
+| PCブラウザ  | 3D描画・物理演算 |
 
-**prompt.md:**
-```markdown
-Create ${count} questions about ${topic}.
-Format: JSON array
-```
+---
 
-**Request:**
-```json
-{
-  "count": 5,
-  "topic": "JavaScript"
+## Technical Details
+
+### 座標管理
+
+* 迷路は **2次元配列（0:床 / 1:壁）** で管理
+* 配列インデックスと3D空間座標を相互変換
+
+### 衝突判定
+
+```js
+if (isWall(nextX + margin, y)) {
+  vx = 0;
 }
 ```
 
-**Result:** Variables `${count}` and `${topic}` are replaced with actual values.
+* 次フレームの位置を予測
+* 壁との接触を検知して速度制御
 
-### API Endpoint
+### 物理処理
 
-**POST** `/api/`
+* 傾き → 加速度へ変換
+* 摩擦係数による減速処理
 
-**Request Body:**
-```json
-{
-  "title": "My Quiz",
-  "count": 5,
-  "any_variable": "value"
-}
+```js
+vx *= friction;
 ```
 
-**Response:**
-```json
-{
-  "title": "My Quiz",
-  "data": [...]
-}
+### ゴール判定
+
+```js
+let d = dist(x, y, goalX, goalY);
+if (d < r + goalSize / 2)
 ```
 
-## Example Applications
+* 距離ベースの当たり判定
+* 半径＋ゴールサイズで精密判定
 
-### 1. IT Certification Quiz (Included)
+---
 
-**Files:**
-- `prompt.md` - Defines IT quiz generation logic
-- `public/quiz.html` - Quiz interface
+## Tech Stack
 
-**Usage:** Generate IT certification practice questions
+| Category      | Technology        |
+| ------------- | ----------------- |
+| Frontend      | JavaScript, p5.js |
+| Backend       | Node.js, Express  |
+| Communication | Socket.io         |
+| Rendering     | WEBGL             |
+| Styling       | CSS3              |
+| Storage       | LocalStorage      |
 
-### 2. Translation App (Example)
+---
 
-**prompt.md:**
-```markdown
-# Translation Service
-
-Translate the following text to ${target_language}:
-
-"${text}"
-
-Return only the translated text.
-```
-
-**Request:**
-```json
-{
-  "text": "Hello world",
-  "target_language": "Japanese"
-}
-```
-
-### 3. Code Review App (Example)
-
-**prompt.md:**
-```markdown
-# Code Review Assistant
-
-Review this ${language} code and provide feedback:
-
-```${language}
-${code}
-```
-
-Provide:
-1. Issues found
-2. Suggestions for improvement
-3. Best practices
-```
-
-**Request:**
-```json
-{
-  "language": "Python",
-  "code": "def hello():\n    print('world')"
-}
-```
-
-## File Structure
+## Project Structure
 
 ```
-generic-webapi/
-├── server.js          # Generic API server (no changes needed)
-├── prompt.md          # Application-specific prompt template
-├── package.json       # Dependencies
-├── .env.example       # Environment variables template
-├── public/            # Static files
-│   ├── quiz.html     # IT quiz application
-│   ├── style.css     # Styles
-│   └── quiz.css      # Quiz-specific styles
-└── README.md         # This file
+3d-gyro-maze/
+├── server.js
+├── package.json
+├── public/
+│   ├── index.html
+│   ├── sketch.js
+│   ├── style.css
+│   └── assets/
+└── README.md
 ```
 
-## Creating New Applications
+---
 
-1. **Edit `prompt.md`** - Define your application logic and variables
-2. **Create client HTML** - Build your user interface in `public/`
-3. **Send requests** - Use any variables you defined in `prompt.md`
+## Highlights
 
-No server code changes required!
+### UX設計
 
-## Environment Variables
+* ゲーム開始のカウントダウン演出
+* ゴール時のフィードバック
+* シンプルで直感的な操作設計
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `GEMINI_API_KEY` | Google Gemini API key | Yes (if using Gemini) |
-| `OPENAI_API_KEY` | OpenAI API key | Yes (if using OpenAI) |
-| `PORT` | Server port | No (default: 8080) |
+### パフォーマンス
 
-## LLM Provider Configuration
+* 描画負荷を抑えたライティング設計
+* 軽量な物理計算ロジック
 
-### Switch to OpenAI
+### 拡張性
 
-1. Edit `server.js`:
-```javascript
-const PROVIDER = 'openai';
-const MODEL = 'gpt-4o-mini';
-```
+* 配列ベースの迷路構造
+* ステージ追加や自動生成が容易
 
-2. Set OpenAI API key in `.env`:
-```env
-OPENAI_API_KEY=your_key_here
-```
+---
 
-### Switch to Gemini
+## Future Improvements
 
-1. Edit `server.js`:
-```javascript
-const PROVIDER = 'gemini';
-const MODEL = 'gemini-2.5-flash';
-```
+* ステージ自動生成アルゴリズム
+* タイムアタックランキング（サーバー保存）
+* モバイルUIの強化
+* マルチプレイヤー対応
 
-2. Set Gemini API key in `.env`:
-```env
-GEMINI_API_KEY=your_key_here
-```
-
-## Development
-
-### Run with auto-restart:
-```bash
-npm run dev
-```
-
-### Supported Models
-
-**OpenAI:**
-- `gpt-4o-mini`
-- `gpt-5-mini`
-
-**Gemini:**
-- `gemini-2.5-flash`
-- `gemini-2.5-flash-lite`
+---
 
 ## License
 
-MIT
+MIT License
 
-## Contributing
 
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
